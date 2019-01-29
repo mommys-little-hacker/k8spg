@@ -1,0 +1,164 @@
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  name: k8spg
+  labels:
+    app: k8spg
+spec:
+  selector:
+    matchLabels:
+      app: k8spg
+  serviceName: k8spg
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: k8spg
+    spec:
+      securityContext:
+        fsGroup: 999
+      initContainers:
+      - name: sysctl
+        image: jackthestripper/k8spg:10.4
+        command:
+        - sysctl
+        - -w
+        - net.core.somaxconn=2048
+        securityContext:
+          privileged: true
+      - name: restore
+        image: jackthestripper/k8spg:10.4
+        env:
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: k8spg
+              key: aws-key-secret
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: k8spg
+              key: aws-key-id
+        - name: WALG_S3_PREFIX
+          valueFrom:
+            secretKeyRef:
+              name: k8spg
+              key: aws-s3-url
+        - name: PGDATA
+          value: /var/lib/postgresql
+        command:
+        - /src/dbrestore.sh
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/postgresql
+        - name: conf
+          mountPath: /etc/postgresql/
+      containers:
+      - name: postgres
+        image: jackthestripper/k8spg:10.4
+        command:
+        - docker-entrypoint.sh
+        - -c
+        - config_file=/etc/postgresql/postgresql.conf
+        env:
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: k8spg
+              key: aws-key-secret
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: k8spg
+              key: aws-key-id
+        - name: WALG_S3_PREFIX
+          valueFrom:
+            secretKeyRef:
+              name: k8spg
+              key: aws-s3-url
+        - name: POSTGRES_USER
+          value: "postgres"
+          # Required for pg_isready in the health probes.
+        - name: PGUSER
+          value: "postgres"
+        - name: POSTGRES_DB
+          value: ""
+        - name: POSTGRES_INITDB_ARGS
+          value: ""
+        - name: PGDATA
+          value: /var/lib/postgresql/data
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: k8spg
+              key: postgres-password
+        ports:
+        - name: postgresql
+          containerPort: 5432
+        livenessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - exec pg_isready --host localhost
+          initialDelaySeconds: 120
+          timeoutSeconds: 5
+          failureThreshold: 6
+        readinessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - exec pg_isready --host localhost
+          initialDelaySeconds: 5
+          timeoutSeconds: 3
+          periodSeconds: 5
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/postgresql/data
+        - name: conf
+          mountPath: /etc/postgresql/
+      - name: cron
+        image: jackthestripper/k8spg:10.4
+        env:
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: k8spg
+              key: aws-key-secret
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: k8spg
+              key: aws-key-id
+        - name: WALG_S3_PREFIX
+          valueFrom:
+            secretKeyRef:
+              name: k8spg
+              key: aws-s3-url
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: k8spg
+              key: postgres-password
+        command:
+        - "/usr/sbin/cron"
+        - "-f"
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/postgresql/data
+        - name: conf
+          mountPath: /etc/postgresql/
+      volumes:
+      - name: data
+      - name: conf
+        configMap:
+          name: k8spg
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 20Gi

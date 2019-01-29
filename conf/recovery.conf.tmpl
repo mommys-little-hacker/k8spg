@@ -1,0 +1,4 @@
+restore_command = '. /etc/postgresql/restore.env && wal-g wal-fetch %f %p'
+recovery_target_time = '$BACKUP_DATE'
+recovery_target = 'immediate'
+recovery_target_action = 'promote'

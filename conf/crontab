@@ -1,0 +1,7 @@
+SHELL=/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+
+# m h dom mon dow user  command
+#15 2    * * *   postgres    /src/dbbackup.sh >> /dev/stdout 2>> /dev/stderr
+#
+ 

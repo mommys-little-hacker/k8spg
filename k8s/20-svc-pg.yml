@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: k8spg
+  labels:
+    app: k8spg
+spec:
+  type: ClusterIP
+  ports:
+  - name: postgresql
+    port: 5432
+  selector:
+    app: k8spg 
