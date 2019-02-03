@@ -45,14 +45,14 @@ spec:
               name: k8spg
               key: aws-s3-url
         - name: PGDATA
-          value: /var/lib/postgresql
+          value: /var/lib/postgresql/data
         command:
         - /src/dbrestore.sh
         volumeMounts:
         - name: data
           mountPath: /var/lib/postgresql
         - name: conf
-          mountPath: /etc/postgresql/
+          mountPath: /etc/postgresql
       containers:
       - name: postgres
         image: jackthestripper/k8spg:10.4
@@ -115,9 +115,9 @@ spec:
           periodSeconds: 5
         volumeMounts:
         - name: data
-          mountPath: /var/lib/postgresql/data
+          mountPath: /var/lib/postgresql
         - name: conf
-          mountPath: /etc/postgresql/
+          mountPath: /etc/postgresql
       - name: cron
         image: jackthestripper/k8spg:10.4
         env:
@@ -146,9 +146,9 @@ spec:
         - "-f"
         volumeMounts:
         - name: data
-          mountPath: /var/lib/postgresql/data
+          mountPath: /var/lib/postgresql
         - name: conf
-          mountPath: /etc/postgresql/
+          mountPath: /etc/postgresql
       volumes:
       - name: data
       - name: conf

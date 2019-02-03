@@ -1,8 +1,11 @@
 #!/bin/bash
 
 secret=${K8SPG_SECRET-"./test/secret.yml"}
+init_sleep=20
 
 minikube status || minikube start
+
+sleep $init_sleep
 
 if [[ -f $secret ]]
 then
