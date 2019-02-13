@@ -9,9 +9,12 @@ ENV AWS_ACCESS_KEY_ID="" \
 
 COPY src /src
 COPY conf/ /etc/postgresql
+COPY cron/start-cron /usr/sbin
 
 # Install wal-g and clean up
-RUN apt-get update \
+RUN 
+    set -e \
+    && apt-get update \
     && apt-get install -f -y --no-install-recommends \
         cron \
         wget \
@@ -22,6 +25,10 @@ RUN apt-get update \
     && chmod 755 /usr/local/bin/wal-g \
         /src/*.sh \
     && ln -rsf /etc/postgresql/crontab /etc/crontab \
+    && mkfifo --mode 0666 /var/log/cron.log \
+    && sed --regexp-extended --in-place \
+    's/^session\s+required\s+pam_loginuid.so$/session optional pam_loginuid.so/' \
+    /etc/pam.d/cron \
     && apt-get purge -y wget \
     && apt-get autoremove -y \
     && apt-get clean -y \
