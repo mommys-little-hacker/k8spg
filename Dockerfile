@@ -12,8 +12,7 @@ COPY conf/ /etc/postgresql
 COPY cron/start-cron /usr/sbin
 
 # Install wal-g and clean up
-RUN 
-    set -e \
+RUN set -e \
     && apt-get update \
     && apt-get install -f -y --no-install-recommends \
         cron \
