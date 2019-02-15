@@ -142,7 +142,6 @@ spec:
               name: k8spg
               key: postgres-password
         command:
-        - bash
         - "/usr/sbin/start-cron"
         volumeMounts:
         - name: data
