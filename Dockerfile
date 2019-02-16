@@ -1,4 +1,4 @@
-FROM postgres:10.4
+FROM postgres:10
 
 ENV AWS_ACCESS_KEY_ID="" \
     AWS_SECRET_ACCESS_KEY="" \
@@ -23,7 +23,7 @@ RUN set -e \
     | tar -xzO > /usr/local/bin/wal-g \
     && chmod 755 /usr/local/bin/wal-g \
         /src/*.sh \
-    && ln -rsf /etc/postgresql/crontab /etc/crontab \
+    && ln -rsf /etc/postgresql/k8spg-cron /etc/cron.d/k8spg-cron \
     && mkfifo --mode 0666 /var/log/cron.log \
     && sed --regexp-extended --in-place \
     's/^session\s+required\s+pam_loginuid.so$/session optional pam_loginuid.so/' \
