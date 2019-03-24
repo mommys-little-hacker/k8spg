@@ -142,7 +142,9 @@ spec:
               name: k8spg
               key: postgres-password
         command:
-        - supercronic
+        - "gosu"
+        - "postgres:postgres"
+        - "supercronic"
         - "-split-logs"
         - "/etc/postgresql/k8spg-cron"
         volumeMounts:

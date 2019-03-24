@@ -9,6 +9,8 @@ ENV AWS_ACCESS_KEY_ID="" \
 
 ADD https://github.com/aptible/supercronic/releases/download/v0.1.8/supercronic-linux-amd64 \
     /usr/local/bin/supercronic
+ADD https://github.com/tianon/gosu/releases/download/1.11/gosu-amd64 \
+    /usr/local/bin/gosu
 COPY src /src
 COPY conf/ /etc/postgresql
 
@@ -23,6 +25,7 @@ RUN set -e \
         | tar -xzO > /usr/local/bin/wal-g \
     && chmod 755 /usr/local/bin/wal-g \
         /usr/local/bin/supercronic \
+        /usr/local/bin/gosu \
         /src/*.sh \
     && apt-get purge -y wget \
     && apt-get autoremove -y \
