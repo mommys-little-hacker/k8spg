@@ -7,27 +7,23 @@ ENV AWS_ACCESS_KEY_ID="" \
     PGUSER="postgres" \
     PGPASSWORD=""
 
+ADD https://github.com/aptible/supercronic/releases/download/v0.1.8/supercronic-linux-amd64 \
+    /usr/local/bin/supercronic
 COPY src /src
 COPY conf/ /etc/postgresql
-COPY cron/start-cron /usr/sbin
 
 # Install wal-g and clean up
 RUN set -e \
     && apt-get update \
     && apt-get install -f -y --no-install-recommends \
-        cron \
         wget \
         ca-certificates \
         gettext-base \
     && wget -q https://github.com/wal-g/wal-g/releases/download/v0.2.3/wal-g.linux-amd64.tar.gz -O - \
-    | tar -xzO > /usr/local/bin/wal-g \
+        | tar -xzO > /usr/local/bin/wal-g \
     && chmod 755 /usr/local/bin/wal-g \
+        /usr/local/bin/supercronic \
         /src/*.sh \
-    && ln -rsf /etc/postgresql/k8spg-cron /etc/cron.d/k8spg-cron \
-    && mkfifo --mode 0666 /var/log/cron.log \
-    && sed --regexp-extended --in-place \
-    's/^session\s+required\s+pam_loginuid.so$/session optional pam_loginuid.so/' \
-    /etc/pam.d/cron \
     && apt-get purge -y wget \
     && apt-get autoremove -y \
     && apt-get clean -y \

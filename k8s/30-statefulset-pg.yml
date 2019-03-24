@@ -142,7 +142,9 @@ spec:
               name: k8spg
               key: postgres-password
         command:
-        - "/usr/sbin/start-cron"
+        - supercronic
+        - "-split-logs"
+        - "/etc/postgresql/k8spg-cron"
         volumeMounts:
         - name: data
           mountPath: /var/lib/postgresql
