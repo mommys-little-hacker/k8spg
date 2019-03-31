@@ -119,7 +119,7 @@ spec:
         - name: conf
           mountPath: /etc/postgresql
       - name: cron
-        image: jackthestripper/k8spg:10
+        image: jackthestripper/k8spg:11
         env:
         - name: AWS_SECRET_ACCESS_KEY
           valueFrom:
