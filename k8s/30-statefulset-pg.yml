@@ -19,7 +19,7 @@ spec:
         fsGroup: 999
       initContainers:
       - name: sysctl
-        image: jackthestripper/k8spg:10
+        image: jackthestripper/k8spg:11
         command:
         - sysctl
         - -w
